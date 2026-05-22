@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visitenkarte – Elias Appuhamy | Elyon.web</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #e8ebe8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 48px;
+      padding: 48px 24px;
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: #444;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .card-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Business card: 85mm x 54mm → at ~3.7px/mm = ~315 x 200px display size, scaled 3x for screen */
+    .card {
+      width: 850px;
+      height: 540px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* ===================== FRONT ===================== */
+    .card-front {
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 52px 64px 48px 64px;
+    }
+
+    .card-front::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(ellipse at top right, rgba(34,197,94,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-front::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 200px;
+      height: 8px;
+      background: linear-gradient(90deg, #16a34a, #22c55e, transparent);
+      border-radius: 0 0 0 18px;
+    }
+
+    .front-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .logo-area svg {
+      width: 220px;
+      height: auto;
+    }
+
+    .tagline-pill {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 100px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .front-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -1px;
+      line-height: 1.05;
+    }
+
+    .name span {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .title-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .promise {
+      font-size: 15px;
+      color: #64748b;
+      font-weight: 400;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* ===================== BACK ===================== */
+    .card-back {
+      background: linear-gradient(145deg, #0d1f12 0%, #0f2a17 40%, #0a1a0e 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 52px 64px 48px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-back::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .card-back::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .back-headline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      max-width: 560px;
+    }
+
+    .back-headline em {
+      font-style: normal;
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 48px;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .contact-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4ade80;
+      opacity: 0.8;
+    }
+
+    .contact-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: #f1f5f9;
+      letter-spacing: 0.2px;
+    }
+
+    .back-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .back-logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .back-logo-text span {
+      color: #22c55e;
+    }
+
+    .qr-placeholder {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(34,197,94,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .qr-placeholder svg {
+      width: 36px;
+      height: 36px;
+      opacity: 0.5;
+    }
+
+    .qr-text {
+      font-size: 9px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Print helper */
+    .print-note {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    @media print {
+      body { background: white; gap: 20mm; padding: 0; }
+      h2, .print-note { display: none; }
+      .card {
+        width: 85mm;
+        height: 54mm;
+        border-radius: 3mm;
+        box-shadow: none;
+        page-break-after: always;
+      }
+      .card-front { padding: 5.5mm 6.5mm 5mm 6.5mm; }
+      .card-back  { padding: 5.5mm 6.5mm 5mm 6.5mm; }
+      .name { font-size: 15mm; }
+      /* scale all other text accordingly */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-wrapper">
+    <h2>Vorderseite</h2>
+    <div class="card card-front">
+
+      <div class="front-top">
+        <!-- Logo SVG (nachgebaut nach EA Web Design) -->
+        <div class="logo-area">
+          <svg viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gE" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#22c55e"/>
+                <stop offset="100%" style="stop-color:#15803d"/>
+              </linearGradient>
+              <linearGradient id="gA" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#1e293b"/>
+                <stop offset="100%" style="stop-color:#0f172a"/>
+              </linearGradient>
+            </defs>
+            <!-- E letter -->
+            <rect x="2" y="4" width="38" height="9" rx="2" fill="url(#gE)"/>
+            <rect x="2" y="21" width="28" height="8" rx="2" fill="url(#gE)"/>
+            <rect x="2" y="38" width="38" height="9" rx="2" fill="url(#gE)"/>
+            <rect x="2" y="4" width="9" height="43" rx="2" fill="url(#gE)"/>
+            <!-- A letter -->
+            <polygon points="62,51 82,4 102,51 93,51 82,18 71,51" fill="url(#gA)"/>
+            <rect x="68" y="33" width="28" height="8" rx="1" fill="url(#gA)"/>
+            <!-- swoosh arrow -->
+            <path d="M 10 62 Q 55 72 95 58" stroke="url(#gE)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <polygon points="95,52 105,58 93,64" fill="#22c55e"/>
+            <!-- WEB DESIGN text -->
+            <text x="118" y="30" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="#0f172a" letter-spacing="1">ELYON</text>
+            <text x="118" y="52" font-family="Inter,sans-serif" font-weight="400" font-size="13" fill="#64748b" letter-spacing="4">.WEB</text>
+          </svg>
+        </div>
+
+        <div class="tagline-pill">Websites die verkaufen</div>
+      </div>
+
+      <div class="front-bottom">
+        <div class="name">Elias <span>Appuhamy</span></div>
+        <div class="title-row">
+          <span class="title">CEO &amp; Founder</span>
+          <div class="title-dot"></div>
+          <span class="title">Elyon.web</span>
+        </div>
+        <div class="promise">Ich kümmere mich persönlich um Ihr Projekt.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <h2>Rückseite</h2>
+    <div class="card card-back">
+
+      <div class="back-headline">
+        Dein nächster Kunde<br>wartet auf <em>deine Website.</em>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-item">
+          <span class="contact-label">Telefon</span>
+          <span class="contact-value">+49 179 1501865</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">E-Mail</span>
+          <span class="contact-value">ea4r3al@gmail.com</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Website</span>
+          <span class="contact-value">elyon-web.de</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">LinkedIn</span>
+          <span class="contact-value">Elias Appuhamy</span>
+        </div>
+      </div>
+
+      <div class="back-footer">
+        <div>
+          <div class="back-logo-text">Elyon<span>.web</span></div>
+          <div style="font-size:12px; color: rgba(255,255,255,0.35); margin-top:4px; letter-spacing:1px;">WEB DESIGN &amp; DEVELOPMENT</div>
+        </div>
+        <div class="qr-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" stroke="white" stroke-width="1.5"/>
+            <rect x="5" y="5" width="3" height="3" fill="white" rx="0.5"/>
+            <rect x="16" y="5" width="3" height="3" fill="white" rx="0.5"/>
+            <rect x="5" y="16" width="3" height="3" fill="white" rx="0.5"/>
+            <path d="M14 14h2v2h-2zM16 16h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="white"/>
+          </svg>
+          <span class="qr-text">QR Code</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="print-note">
+    <strong>Drucken:</strong> Strg+P → "Hintergrundgrafiken drucken" aktivieren → Format: A4 Querformat empfohlen.<br>
+    Druckgröße: 85 × 54 mm (Standardformat). Auf 300g Papier drucken für professionelles Ergebnis.
+  </p>
+
+</body>
+</html>
