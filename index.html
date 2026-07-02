@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elyon.web – Rechnungsgenerator</title>
+<style>
+  :root {
+    --green-900: #0b3d2e;
+    --green-800: #14532d;
+    --green-700: #15803d;
+    --green-600: #16a34a;
+    --green-500: #22c55e;
+    --green-100: #dcfce7;
+    --green-50:  #f0fdf4;
+    --ink: #1a2e24;
+    --muted: #5f7268;
+    --line: #e2ece6;
+    --bg: #f6faf7;
+    --card: #ffffff;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(11, 61, 46, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ---------- App-Kopfzeile ---------- */
+  header.appbar {
+    background: linear-gradient(135deg, var(--green-900), var(--green-700));
+    color: #fff;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header.appbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.2px;
+  }
+  header.appbar .brand .dot {
+    width: 34px; height: 34px;
+    background: #fff;
+    color: var(--green-700);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  header.appbar .brand small {
+    display: block;
+    font-weight: 400;
+    font-size: 12.5px;
+    opacity: 0.85;
+    letter-spacing: 0;
+  }
+  header.appbar nav { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.06s ease, box-shadow 0.15s ease, background 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--green-600); color: #fff; }
+  .btn-primary:hover { background: var(--green-700); }
+  .btn-ghost { background: rgba(255,255,255,0.14); color: #fff; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.24); }
+  .btn-light { background: var(--green-100); color: var(--green-800); }
+  .btn-light:hover { background: #cdeed9; }
+  .btn-outline {
+    background: #fff; color: var(--green-800);
+    border: 1.5px solid var(--line);
+  }
+  .btn-outline:hover { border-color: var(--green-500); }
+  .btn-danger { background: #fdecec; color: #b42318; }
+  .btn-danger:hover { background: #fad9d9; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 460px 1fr;
+    gap: 26px;
+    padding: 26px;
+    max-width: 1560px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .panel-head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    background: var(--green-50);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .panel-head h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--green-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-body { padding: 20px 22px; }
+
+  /* ---------- Formulare ---------- */
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  input[type="text"], input[type="email"], input[type="date"],
+  input[type="number"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--green-500);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------- Positionen ---------- */
+  .items-table { width: 100%; }
+  .item-row {
+    display: grid;
+    grid-template-columns: 1fr 64px 82px 100px 34px;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: start;
+  }
+  .item-row input { padding: 9px 10px; font-size: 14px; }
+  .item-head {
+    display: grid;
+    grid-template-columns: 1fr 64px 82px 100px 34px;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+  .del-item {
+    background: none;
+    border: none;
+    color: #c33;
+    font-size: 18px;
+    cursor: pointer;
+    height: 38px;
+    border-radius: 8px;
+  }
+  .del-item:hover { background: #fdecec; }
+
+  .totals-box {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--green-50);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    color: var(--green-900);
+    font-size: 16px;
+  }
+
+  /* ---------- Tabs ---------- */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 14px 22px 0;
+  }
+  .tab {
+    padding: 9px 16px;
+    border-radius: 9px 9px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--green-50);
+    color: var(--green-800);
+    border: 1px solid var(--line);
+    border-bottom-color: var(--green-50);
+  }
+  .tabpage { display: none; }
+  .tabpage.active { display: block; }
+
+  /* ---------- Gespeicherte Rechnungen ---------- */
+  .saved-list { list-style: none; }
+  .saved-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .saved-list .meta { flex: 1; min-width: 0; }
+  .saved-list .meta strong { display: block; font-size: 14.5px; color: var(--green-900); }
+  .saved-list .meta span { font-size: 12.5px; color: var(--muted); }
+  .saved-list .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .empty-note {
+    text-align: center;
+    color: var(--muted);
+    padding: 26px 10px;
+    font-size: 14px;
+  }
+
+  /* ---------- Logo-Upload ---------- */
+  .logo-drop {
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .logo-drop:hover { border-color: var(--green-500); background: var(--green-50); }
+  .logo-drop img { max-height: 70px; max-width: 100%; }
+  .logo-drop p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* =====================================================
+     RECHNUNGSVORSCHAU (DIN A4)
+     ===================================================== */
+  .preview-wrap {
+    position: sticky;
+    top: 20px;
+  }
+  .preview-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .preview-toolbar .title { font-weight: 700; color: var(--green-900); font-size: 15px; }
+
+  .sheet-scale {
+    overflow-x: auto;
+  }
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    background: #fff;
+    margin: 0 auto;
+    box-shadow: 0 6px 40px rgba(11, 61, 46, 0.15);
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    font-size: 10.5pt;
+    color: #1f2d27;
+  }
+
+  /* Grüner Kopfbalken */
+  .sheet .head-band {
+    background: linear-gradient(120deg, var(--green-900) 0%, var(--green-700) 70%, var(--green-600) 100%);
+    color: #fff;
+    padding: 12mm 16mm 10mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10mm;
+    border-radius: 4px 4px 0 0;
+  }
+  .sheet .head-band .logo-slot img {
+    max-height: 22mm;
+    max-width: 62mm;
+    display: block;
+    background: #fff;
+    border-radius: 3mm;
+    padding: 2mm 3mm;
+  }
+  .sheet .head-band .doc-title {
+    text-align: right;
+  }
+  .sheet .head-band .doc-title h1 {
+    font-size: 21pt;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .sheet .head-band .doc-title .nr {
+    font-size: 11pt;
+    opacity: 0.9;
+    margin-top: 1mm;
+  }
+
+  .sheet .body-pad {
+    padding: 10mm 16mm 0;
+    flex: 1;
+  }
+
+  .sheet .sender-line {
+    font-size: 7.5pt;
+    color: #6b7f75;
+    border-bottom: 0.4pt solid var(--green-600);
+    padding-bottom: 1mm;
+    margin-bottom: 4mm;
+    width: 85mm;
+  }
+
+  .sheet .addr-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12mm;
+    margin-bottom: 10mm;
+  }
+  .sheet .addr {
+    width: 85mm;
+    line-height: 1.55;
+  }
+  .sheet .addr .name { font-weight: 700; }
+  .sheet .meta-table {
+    font-size: 9.5pt;
+    line-height: 1.7;
+    min-width: 55mm;
+  }
+  .sheet .meta-table td:first-child {
+    color: #6b7f75;
+    padding-right: 6mm;
+    white-space: nowrap;
+  }
+  .sheet .meta-table td:last-child { text-align: right; font-weight: 600; }
+
+  .sheet h2.subject {
+    font-size: 12pt;
+    color: var(--green-900);
+    margin-bottom: 3mm;
+    font-weight: 700;
+  }
+  .sheet .intro { margin-bottom: 6mm; }
+
+  .sheet table.items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 5mm;
+  }
+  .sheet table.items thead th {
+    background: var(--green-50);
+    color: var(--green-900);
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    padding: 3mm 3mm;
+    border-bottom: 1.2pt solid var(--green-600);
+  }
+  .sheet table.items thead th.num,
+  .sheet table.items tbody td.num { text-align: right; }
+  .sheet table.items tbody td {
+    padding: 3mm 3mm;
+    border-bottom: 0.4pt solid var(--line);
+    vertical-align: top;
+  }
+  .sheet .totals {
+    width: 72mm;
+    margin-left: auto;
+    font-size: 10.5pt;
+  }
+  .sheet .totals .trow {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.6mm 3mm;
+  }
+  .sheet .totals .grand {
+    background: var(--green-900);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 2mm;
+    font-size: 11.5pt;
+    margin-top: 1mm;
+  }
+
+  .sheet .tax-note {
+    margin-top: 6mm;
+    padding: 3.5mm 4mm;
+    background: var(--green-50);
+    border-left: 1.2mm solid var(--green-600);
+    border-radius: 1.5mm;
+    font-size: 9.5pt;
+    color: #2e4638;
+  }
+  .sheet .pay-note { margin-top: 5mm; font-size: 10pt; }
+  .sheet .thanks { margin-top: 5mm; font-size: 10pt; }
+
+  .sheet footer.sheet-foot {
+    margin-top: auto;
+    border-top: 0.6pt solid var(--green-600);
+    padding: 5mm 16mm 8mm;
+    display: flex;
+    justify-content: space-between;
+    gap: 8mm;
+    font-size: 7.8pt;
+    color: #55685e;
+    line-height: 1.6;
+  }
+  .sheet footer.sheet-foot .col strong {
+    display: block;
+    color: var(--green-900);
+    font-size: 8pt;
+    margin-bottom: 0.5mm;
+  }
+
+  /* ---------- Druck ---------- */
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { background: #fff; }
+    body * { visibility: hidden; }
+    .sheet, .sheet * { visibility: visible; }
+    .sheet {
+      position: absolute;
+      left: 0; top: 0;
+      width: 210mm;
+      min-height: 296mm;
+      margin: 0;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .sheet .head-band { border-radius: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--green-900);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 999;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="dot">E</div>
+    <div>
+      Elyon.web Rechnungen
+      <small>Rechnungsgenerator · Kleinunternehmer § 19 UStG</small>
+    </div>
+  </div>
+  <nav>
+    <button class="btn btn-ghost" onclick="newInvoice()">＋ Neue Rechnung</button>
+    <button class="btn btn-ghost" onclick="saveInvoice()">💾 Speichern</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ Drucken / PDF</button>
+  </nav>
+</header>
+
+<div class="layout">
+
+  <!-- ================= LINKE SPALTE: EINGABE ================= -->
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab active" data-tab="tab-invoice" onclick="showTab('tab-invoice', this)">Rechnung</button>
+      <button class="tab" data-tab="tab-saved" onclick="showTab('tab-saved', this)">Gespeichert</button>
+      <button class="tab" data-tab="tab-settings" onclick="showTab('tab-settings', this)">⚙️ Meine Daten</button>
+    </div>
+
+    <!-- ---- Tab: Rechnung ---- -->
+    <div class="tabpage active panel-body" id="tab-invoice">
+      <div class="row">
+        <div class="field">
+          <label for="invNumber">Rechnungsnummer</label>
+          <input type="text" id="invNumber">
+          <div class="hint">Fortlaufend – wird automatisch hochgezählt.</div>
+        </div>
+        <div class="field">
+          <label for="invDate">Rechnungsdatum</label>
+          <input type="date" id="invDate">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="servicePeriod">Leistungsdatum / -zeitraum</label>
+          <input type="text" id="servicePeriod" placeholder="z. B. 01.06.2026 – 28.06.2026">
+        </div>
+        <div class="field">
+          <label for="dueDays">Zahlungsziel (Tage)</label>
+          <input type="number" id="dueDays" min="0" value="14">
+        </div>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--line); margin: 6px 0 16px;">
+
+      <div class="field">
+        <label for="custCompany">Kunde – Firma / Name</label>
+        <input type="text" id="custCompany" placeholder="Musterfirma GmbH">
+      </div>
+      <div class="field">
+        <label for="custContact">Ansprechpartner (optional)</label>
+        <input type="text" id="custContact" placeholder="Max Mustermann">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="custStreet">Straße &amp; Nr.</label>
+          <input type="text" id="custStreet" placeholder="Musterstraße 1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field" style="max-width: 130px;">
+          <label for="custZip">PLZ</label>
+          <input type="text" id="custZip" placeholder="12345">
+        </div>
+        <div class="field">
+          <label for="custCity">Ort</label>
+          <input type="text" id="custCity" placeholder="Musterstadt">
+        </div>
+      </div>
+      <div class="field">
+        <label for="subject">Betreff / Projekt</label>
+        <input type="text" id="subject" placeholder="z. B. Webdesign &amp; Entwicklung Firmenwebsite">
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--line); margin: 6px 0 16px;">
+
+      <label style="margin-bottom: 8px;">Leistungen / Positionen</label>
+      <div class="item-head">
+        <span>Bezeichnung</span><span>Menge</span><span>Einheit</span><span>Preis €</span><span></span>
+      </div>
+      <div id="itemRows"></div>
+      <button class="btn btn-light btn-sm" onclick="addItem()">＋ Position hinzufügen</button>
+
+      <div class="totals-box">
+        <span>Gesamtbetrag</span>
+        <span id="formTotal">0,00 €</span>
+      </div>
+
+      <div class="field" style="margin-top: 16px;">
+        <label for="extraNote">Zusätzliche Bemerkung (optional)</label>
+        <textarea id="extraNote" placeholder="Erscheint unten auf der Rechnung"></textarea>
+      </div>
+    </div>
+
+    <!-- ---- Tab: Gespeicherte Rechnungen ---- -->
+    <div class="tabpage panel-body" id="tab-saved">
+      <ul class="saved-list" id="savedList"></ul>
+      <div class="empty-note" id="savedEmpty">Noch keine Rechnungen gespeichert.<br>Rechnung ausfüllen und oben auf „Speichern“ klicken.</div>
+    </div>
+
+    <!-- ---- Tab: Einstellungen / Firmendaten ---- -->
+    <div class="tabpage panel-body" id="tab-settings">
+      <div class="field">
+        <label>Logo (erscheint oben auf jeder Rechnung)</label>
+        <div class="logo-drop" onclick="document.getElementById('logoInput').click()">
+          <img id="logoPreviewImg" src="" alt="Logo">
+          <p>Klicken, um dein eigenes Logo hochzuladen (PNG, JPG oder SVG).<br>Es wird dauerhaft im Browser gespeichert.</p>
+        </div>
+        <input type="file" id="logoInput" accept="image/*,.svg" style="display:none" onchange="uploadLogo(this)">
+        <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="resetLogo()">Standard-Logo wiederherstellen</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="setCompany">Firmenname</label>
+          <input type="text" id="setCompany">
+        </div>
+        <div class="field">
+          <label for="setOwner">Inhaber</label>
+          <input type="text" id="setOwner">
+        </div>
+      </div>
+      <div class="field">
+        <label for="setStreet">Straße &amp; Nr.</label>
+        <input type="text" id="setStreet" placeholder="Musterstraße 1">
+      </div>
+      <div class="row">
+        <div class="field" style="max-width: 130px;">
+          <label for="setZip">PLZ</label>
+          <input type="text" id="setZip">
+        </div>
+        <div class="field">
+          <label for="setCity">Ort</label>
+          <input type="text" id="setCity">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="setEmail">E-Mail</label>
+          <input type="email" id="setEmail">
+        </div>
+        <div class="field">
+          <label for="setPhone">Telefon (optional)</label>
+          <input type="text" id="setPhone">
+        </div>
+      </div>
+      <div class="field">
+        <label for="setWebsite">Website</label>
+        <input type="text" id="setWebsite">
+      </div>
+      <div class="field">
+        <label for="setTaxId">Steuernummer (oder USt-IdNr.)</label>
+        <input type="text" id="setTaxId" placeholder="z. B. 12/345/67890">
+        <div class="hint">Pflichtangabe nach § 14 Abs. 4 Nr. 2 UStG – vom Finanzamt zugeteilte Steuernummer oder USt-IdNr.</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="setBank">Bank</label>
+          <input type="text" id="setBank" placeholder="z. B. Sparkasse …">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="setIban">IBAN</label>
+          <input type="text" id="setIban" placeholder="DE00 0000 0000 0000 0000 00">
+        </div>
+        <div class="field" style="max-width: 150px;">
+          <label for="setBic">BIC</label>
+          <input type="text" id="setBic">
+        </div>
+      </div>
+      <div class="field">
+        <label for="setTaxNote">Hinweis zur Umsatzsteuerbefreiung</label>
+        <textarea id="setTaxNote"></textarea>
+        <div class="hint">Standardtext für Kleinunternehmer nach § 19 UStG – kann angepasst werden.</div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">Firmendaten speichern</button>
+    </div>
+  </div>
+
+  <!-- ================= RECHTE SPALTE: VORSCHAU ================= -->
+  <div class="preview-wrap">
+    <div class="preview-toolbar">
+      <span class="title">Live-Vorschau (DIN A4)</span>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Drucken / Als PDF speichern</button>
+    </div>
+    <div class="sheet-scale">
+      <div class="sheet" id="sheet">
+
+        <div class="head-band">
+          <div class="logo-slot"><img id="pLogo" src="" alt="Logo"></div>
+          <div class="doc-title">
+            <h1>Rechnung</h1>
+            <div class="nr">Nr. <span id="pNumber">–</span></div>
+          </div>
+        </div>
+
+        <div class="body-pad">
+          <div class="sender-line" id="pSenderLine">–</div>
+
+          <div class="addr-meta">
+            <div class="addr">
+              <div class="name" id="pCustCompany">–</div>
+              <div id="pCustContact"></div>
+              <div id="pCustStreet"></div>
+              <div id="pCustCity"></div>
+            </div>
+            <table class="meta-table">
+              <tr><td>Rechnungsnummer</td><td id="pMetaNumber">–</td></tr>
+              <tr><td>Rechnungsdatum</td><td id="pMetaDate">–</td></tr>
+              <tr><td>Leistungszeitraum</td><td id="pMetaPeriod">–</td></tr>
+              <tr><td>Fällig bis</td><td id="pMetaDue">–</td></tr>
+            </table>
+          </div>
+
+          <h2 class="subject" id="pSubject">Rechnung</h2>
+          <p class="intro">Sehr geehrte Damen und Herren,<br>vielen Dank für Ihren Auftrag. Vereinbarungsgemäß berechne ich Ihnen die folgenden Leistungen:</p>
+
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width: 8mm;">Pos.</th>
+                <th>Leistung</th>
+                <th class="num" style="width: 18mm;">Menge</th>
+                <th style="width: 20mm;">Einheit</th>
+                <th class="num" style="width: 26mm;">Einzelpreis</th>
+                <th class="num" style="width: 28mm;">Betrag</th>
+              </tr>
+            </thead>
+            <tbody id="pItems"></tbody>
+          </table>
+
+          <div class="totals">
+            <div class="trow"><span>Zwischensumme</span><span id="pSubtotal">0,00 €</span></div>
+            <div class="trow"><span>Umsatzsteuer</span><span>entfällt*</span></div>
+            <div class="trow grand"><span>Rechnungsbetrag</span><span id="pTotal">0,00 €</span></div>
+          </div>
+
+          <div class="tax-note" id="pTaxNote">*&nbsp;Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</div>
+
+          <p class="pay-note" id="pPayNote">–</p>
+          <p class="thanks" id="pExtraNote" style="display:none;"></p>
+          <p class="thanks">Vielen Dank für die gute Zusammenarbeit!<br><br>Mit freundlichen Grüßen<br><strong id="pSignName">–</strong></p>
+        </div>
+
+        <footer class="sheet-foot">
+          <div class="col">
+            <strong id="pFootCompany">–</strong>
+            <span id="pFootAddr">–</span><br>
+            <span id="pFootOwner"></span>
+          </div>
+          <div class="col">
+            <strong>Kontakt</strong>
+            <span id="pFootEmail">–</span><br>
+            <span id="pFootPhone"></span>
+            <span id="pFootWeb"></span>
+          </div>
+          <div class="col">
+            <strong>Bankverbindung</strong>
+            <span id="pFootBank">–</span><br>
+            <span id="pFootIban">–</span><br>
+            <span id="pFootBic"></span>
+          </div>
+          <div class="col">
+            <strong>Steuernummer</strong>
+            <span id="pFootTax">–</span>
+          </div>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =====================================================
+   Standard-Logo (weiß-grünes Elyon.web-Wortmarken-SVG)
+   ===================================================== */
+const DEFAULT_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(
+`<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96">
+  <rect width="360" height="96" rx="14" fill="#ffffff"/>
+  <g>
+    <rect x="18" y="20" width="56" height="56" rx="14" fill="#15803d"/>
+    <path d="M36 38h22M36 48h16M36 58h22" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="92" y="60" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700" fill="#0b3d2e">Elyon<tspan fill="#16a34a">.web</tspan></text>
+  <text x="93" y="80" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5f7268">Web Design &amp; Development</text>
+</svg>`);
+
+/* =====================================================
+   Standard-Firmendaten (unter „Meine Daten“ änderbar)
+   ===================================================== */
+const DEFAULT_SETTINGS = {
+  company: "Elyon.web",
+  owner: "Elias Appuhamy",
+  street: "",
+  zip: "",
+  city: "",
+  email: "info@elyon-web.de",
+  phone: "",
+  website: "https://elyon-web.de",
+  taxId: "",
+  bank: "",
+  iban: "",
+  bic: "",
+  taxNote: "Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).",
+  logo: DEFAULT_LOGO
+};
+
+const LS_SETTINGS = "elyon_invoice_settings";
+const LS_INVOICES = "elyon_invoices";
+const LS_COUNTER  = "elyon_invoice_counter";
+
+let settings = loadSettings();
+let currentId = null;
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(LS_SETTINGS);
+    if (raw) return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+  } catch (e) {}
+  return Object.assign({}, DEFAULT_SETTINGS);
+}
+
+function persistSettings() {
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+}
+
+/* ---------- Hilfsfunktionen ---------- */
+const fmtEUR = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
+
+function fmtDate(iso) {
+  if (!iso) return "–";
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll(".tabpage").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+  if (id === "tab-saved") renderSavedList();
+}
+
+/* =====================================================
+   Rechnungsnummer: JJJJ-NNN, automatisch fortlaufend
+   ===================================================== */
+function nextInvoiceNumber() {
+  const year = new Date().getFullYear();
+  let data = { year: year, count: 0 };
+  try { data = Object.assign(data, JSON.parse(localStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
+  if (data.year !== year) { data.year = year; data.count = 0; }
+  return `${data.year}-${String(data.count + 1).padStart(3, "0")}`;
+}
+
+function bumpCounter(number) {
+  const m = /^(\d{4})-(\d+)$/.exec(number || "");
+  if (!m) return;
+  const year = parseInt(m[1], 10), num = parseInt(m[2], 10);
+  let data = { year: year, count: 0 };
+  try { data = Object.assign(data, JSON.parse(localStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
+  if (data.year !== year || num > data.count) {
+    data.year = year;
+    data.count = Math.max(num, data.year === year ? data.count : 0);
+  }
+  localStorage.setItem(LS_COUNTER, JSON.stringify({ year: year, count: Math.max(num, data.count) }));
+}
+
+/* =====================================================
+   Positionen
+   ===================================================== */
+function addItem(desc = "", qty = 1, unit = "Pauschal", price = "") {
+  const rows = document.getElementById("itemRows");
+  const row = document.createElement("div");
+  row.className = "item-row";
+  row.innerHTML = `
+    <input type="text" class="i-desc" placeholder="z. B. Webdesign Startseite" value="">
+    <input type="number" class="i-qty" min="0" step="0.5" value="">
+    <input type="text" class="i-unit" value="">
+    <input type="number" class="i-price" min="0" step="0.01" placeholder="0,00" value="">
+    <button class="del-item" title="Position entfernen">✕</button>`;
+  row.querySelector(".i-desc").value = desc;
+  row.querySelector(".i-qty").value = qty;
+  row.querySelector(".i-unit").value = unit;
+  row.querySelector(".i-price").value = price;
+  row.querySelector(".del-item").addEventListener("click", () => { row.remove(); render(); });
+  row.querySelectorAll("input").forEach(i => i.addEventListener("input", render));
+  rows.appendChild(row);
+  render();
+}
+
+function readItems() {
+  return Array.from(document.querySelectorAll("#itemRows .item-row")).map(r => ({
+    desc: r.querySelector(".i-desc").value.trim(),
+    qty: parseFloat(r.querySelector(".i-qty").value) || 0,
+    unit: r.querySelector(".i-unit").value.trim(),
+    price: parseFloat(r.querySelector(".i-price").value) || 0
+  })).filter(i => i.desc || i.price > 0);
+}
+
+/* =====================================================
+   Formulardaten lesen / schreiben
+   ===================================================== */
+function readForm() {
+  return {
+    id: currentId,
+    number: document.getElementById("invNumber").value.trim(),
+    date: document.getElementById("invDate").value,
+    period: document.getElementById("servicePeriod").value.trim(),
+    dueDays: parseInt(document.getElementById("dueDays").value, 10) || 0,
+    custCompany: document.getElementById("custCompany").value.trim(),
+    custContact: document.getElementById("custContact").value.trim(),
+    custStreet: document.getElementById("custStreet").value.trim(),
+    custZip: document.getElementById("custZip").value.trim(),
+    custCity: document.getElementById("custCity").value.trim(),
+    subject: document.getElementById("subject").value.trim(),
+    extraNote: document.getElementById("extraNote").value.trim(),
+    items: readItems()
+  };
+}
+
+function fillForm(inv) {
+  currentId = inv.id || null;
+  document.getElementById("invNumber").value = inv.number || "";
+  document.getElementById("invDate").value = inv.date || "";
+  document.getElementById("servicePeriod").value = inv.period || "";
+  document.getElementById("dueDays").value = inv.dueDays != null ? inv.dueDays : 14;
+  document.getElementById("custCompany").value = inv.custCompany || "";
+  document.getElementById("custContact").value = inv.custContact || "";
+  document.getElementById("custStreet").value = inv.custStreet || "";
+  document.getElementById("custZip").value = inv.custZip || "";
+  document.getElementById("custCity").value = inv.custCity || "";
+  document.getElementById("subject").value = inv.subject || "";
+  document.getElementById("extraNote").value = inv.extraNote || "";
+  document.getElementById("itemRows").innerHTML = "";
+  (inv.items && inv.items.length ? inv.items : [{ desc: "", qty: 1, unit: "Pauschal", price: "" }])
+    .forEach(i => addItem(i.desc, i.qty, i.unit, i.price));
+  render();
+}
+
+function newInvoice() {
+  const today = new Date().toISOString().slice(0, 10);
+  fillForm({ number: nextInvoiceNumber(), date: today, dueDays: 14 });
+  showTab("tab-invoice", document.querySelector('[data-tab="tab-invoice"]'));
+  toast("Neue Rechnung angelegt");
+}
+
+/* =====================================================
+   Live-Vorschau rendern
+   ===================================================== */
+function render() {
+  const f = readForm();
+  const s = settings;
+
+  document.getElementById("pLogo").src = s.logo || DEFAULT_LOGO;
+  document.getElementById("pNumber").textContent = f.number || "–";
+  document.getElementById("pMetaNumber").textContent = f.number || "–";
+  document.getElementById("pMetaDate").textContent = fmtDate(f.date);
+  document.getElementById("pMetaPeriod").textContent = f.period || fmtDate(f.date);
+
+  let dueText = "–";
+  if (f.date && f.dueDays >= 0) {
+    const d = new Date(f.date);
+    d.setDate(d.getDate() + f.dueDays);
+    dueText = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+  document.getElementById("pMetaDue").textContent = dueText;
+
+  const senderParts = [s.company, s.street, [s.zip, s.city].filter(Boolean).join(" ")].filter(Boolean);
+  document.getElementById("pSenderLine").textContent = senderParts.join(" · ") || "Bitte Firmendaten unter „Meine Daten“ eintragen";
+
+  document.getElementById("pCustCompany").textContent = f.custCompany || "–";
+  document.getElementById("pCustContact").textContent = f.custContact;
+  document.getElementById("pCustStreet").textContent = f.custStreet;
+  document.getElementById("pCustCity").textContent = [f.custZip, f.custCity].filter(Boolean).join(" ");
+
+  document.getElementById("pSubject").textContent = f.subject ? "Rechnung – " + f.subject : "Rechnung";
+
+  const tbody = document.getElementById("pItems");
+  tbody.innerHTML = "";
+  let total = 0;
+  f.items.forEach((it, idx) => {
+    const line = it.qty * it.price;
+    total += line;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td></td>
+      <td class="num"></td>
+      <td></td>
+      <td class="num"></td>
+      <td class="num"></td>`;
+    tr.children[1].textContent = it.desc || "–";
+    tr.children[2].textContent = String(it.qty).replace(".", ",");
+    tr.children[3].textContent = it.unit;
+    tr.children[4].textContent = fmtEUR.format(it.price);
+    tr.children[5].textContent = fmtEUR.format(line);
+    tbody.appendChild(tr);
+  });
+  if (!f.items.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>1</td><td style="color:#9ab0a5;">Noch keine Positionen erfasst</td><td class="num"></td><td></td><td class="num"></td><td class="num"></td>`;
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById("pSubtotal").textContent = fmtEUR.format(total);
+  document.getElementById("pTotal").textContent = fmtEUR.format(total);
+  document.getElementById("formTotal").textContent = fmtEUR.format(total);
+
+  document.getElementById("pTaxNote").textContent = "* " + (s.taxNote || DEFAULT_SETTINGS.taxNote);
+
+  document.getElementById("pPayNote").textContent =
+    `Bitte überweisen Sie den Rechnungsbetrag von ${fmtEUR.format(total)} bis zum ${dueText} ohne Abzug auf das unten angegebene Konto.`;
+
+  const extra = document.getElementById("pExtraNote");
+  extra.textContent = f.extraNote;
+  extra.style.display = f.extraNote ? "block" : "none";
+
+  document.getElementById("pSignName").textContent = s.owner || s.company;
+
+  document.getElementById("pFootCompany").textContent = s.company || "–";
+  document.getElementById("pFootAddr").textContent = [s.street, [s.zip, s.city].filter(Boolean).join(" ")].filter(Boolean).join(", ") || "–";
+  document.getElementById("pFootOwner").textContent = s.owner ? "Inhaber: " + s.owner : "";
+  document.getElementById("pFootEmail").textContent = s.email || "–";
+  document.getElementById("pFootPhone").innerHTML = s.phone ? escapeHtml(s.phone) + "<br>" : "";
+  document.getElementById("pFootWeb").textContent = (s.website || "").replace(/^https?:\/\//, "");
+  document.getElementById("pFootBank").textContent = s.bank || "–";
+  document.getElementById("pFootIban").textContent = s.iban ? "IBAN: " + s.iban : "–";
+  document.getElementById("pFootBic").textContent = s.bic ? "BIC: " + s.bic : "";
+  document.getElementById("pFootTax").textContent = s.taxId || "– bitte eintragen –";
+}
+
+function escapeHtml(str) {
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* =====================================================
+   Speichern / Laden von Rechnungen
+   ===================================================== */
+function loadInvoices() {
+  try { return JSON.parse(localStorage.getItem(LS_INVOICES) || "[]"); } catch (e) { return []; }
+}
+
+function saveInvoice() {
+  const f = readForm();
+  if (!f.number) { toast("Bitte eine Rechnungsnummer eingeben"); return; }
+  const list = loadInvoices();
+  if (!f.id) {
+    f.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    currentId = f.id;
+  }
+  const idx = list.findIndex(i => i.id === f.id);
+  f.savedAt = new Date().toISOString();
+  if (idx >= 0) list[idx] = f; else list.unshift(f);
+  localStorage.setItem(LS_INVOICES, JSON.stringify(list));
+  bumpCounter(f.number);
+  renderSavedList();
+  toast("Rechnung " + f.number + " gespeichert ✓");
+}
+
+function renderSavedList() {
+  const list = loadInvoices();
+  const ul = document.getElementById("savedList");
+  const empty = document.getElementById("savedEmpty");
+  ul.innerHTML = "";
+  empty.style.display = list.length ? "none" : "block";
+  list.forEach(inv => {
+    const total = (inv.items || []).reduce((s, i) => s + i.qty * i.price, 0);
+    const li = document.createElement("li");
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const strong = document.createElement("strong");
+    strong.textContent = `${inv.number} · ${inv.custCompany || "Ohne Kunde"}`;
+    const span = document.createElement("span");
+    span.textContent = `${fmtDate(inv.date)} · ${fmtEUR.format(total)}`;
+    meta.appendChild(strong); meta.appendChild(span);
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const btnOpen = document.createElement("button");
+    btnOpen.className = "btn btn-light btn-sm";
+    btnOpen.textContent = "Öffnen";
+    btnOpen.onclick = () => {
+      fillForm(inv);
+      showTab("tab-invoice", document.querySelector('[data-tab="tab-invoice"]'));
+      toast("Rechnung " + inv.number + " geladen");
+    };
+
+    const btnCopy = document.createElement("button");
+    btnCopy.className = "btn btn-outline btn-sm";
+    btnCopy.textContent = "Duplizieren";
+    btnCopy.onclick = () => {
+      const copy = JSON.parse(JSON.stringify(inv));
+      copy.id = null;
+      copy.number = nextInvoiceNumber();
+      copy.date = new Date().toISOString().slice(0, 10);
+      fillForm(copy);
+      showTab("tab-invoice", document.querySelector('[data-tab="tab-invoice"]'));
+      toast("Kopie angelegt – neue Nr. " + copy.number);
+    };
+
+    const btnDel = document.createElement("button");
+    btnDel.className = "btn btn-danger btn-sm";
+    btnDel.textContent = "Löschen";
+    btnDel.onclick = () => {
+      if (!confirm(`Rechnung ${inv.number} wirklich löschen?`)) return;
+      const rest = loadInvoices().filter(i => i.id !== inv.id);
+      localStorage.setItem(LS_INVOICES, JSON.stringify(rest));
+      renderSavedList();
+      toast("Rechnung gelöscht");
+    };
+
+    actions.appendChild(btnOpen);
+    actions.appendChild(btnCopy);
+    actions.appendChild(btnDel);
+    li.appendChild(meta);
+    li.appendChild(actions);
+    ul.appendChild(li);
+  });
+}
+
+/* =====================================================
+   Einstellungen (Firmendaten & Logo)
+   ===================================================== */
+function fillSettingsForm() {
+  document.getElementById("setCompany").value = settings.company;
+  document.getElementById("setOwner").value = settings.owner;
+  document.getElementById("setStreet").value = settings.street;
+  document.getElementById("setZip").value = settings.zip;
+  document.getElementById("setCity").value = settings.city;
+  document.getElementById("setEmail").value = settings.email;
+  document.getElementById("setPhone").value = settings.phone;
+  document.getElementById("setWebsite").value = settings.website;
+  document.getElementById("setTaxId").value = settings.taxId;
+  document.getElementById("setBank").value = settings.bank;
+  document.getElementById("setIban").value = settings.iban;
+  document.getElementById("setBic").value = settings.bic;
+  document.getElementById("setTaxNote").value = settings.taxNote;
+  document.getElementById("logoPreviewImg").src = settings.logo;
+}
+
+function saveSettings() {
+  settings.company = document.getElementById("setCompany").value.trim();
+  settings.owner = document.getElementById("setOwner").value.trim();
+  settings.street = document.getElementById("setStreet").value.trim();
+  settings.zip = document.getElementById("setZip").value.trim();
+  settings.city = document.getElementById("setCity").value.trim();
+  settings.email = document.getElementById("setEmail").value.trim();
+  settings.phone = document.getElementById("setPhone").value.trim();
+  settings.website = document.getElementById("setWebsite").value.trim();
+  settings.taxId = document.getElementById("setTaxId").value.trim();
+  settings.bank = document.getElementById("setBank").value.trim();
+  settings.iban = document.getElementById("setIban").value.trim();
+  settings.bic = document.getElementById("setBic").value.trim();
+  settings.taxNote = document.getElementById("setTaxNote").value.trim() || DEFAULT_SETTINGS.taxNote;
+  persistSettings();
+  render();
+  toast("Firmendaten gespeichert ✓");
+}
+
+function uploadLogo(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    settings.logo = e.target.result;
+    persistSettings();
+    document.getElementById("logoPreviewImg").src = settings.logo;
+    render();
+    toast("Logo gespeichert ✓ – erscheint jetzt auf jeder Rechnung");
+  };
+  reader.readAsDataURL(file);
+  input.value = "";
+}
+
+function resetLogo() {
+  settings.logo = DEFAULT_LOGO;
+  persistSettings();
+  document.getElementById("logoPreviewImg").src = DEFAULT_LOGO;
+  render();
+  toast("Standard-Logo wiederhergestellt");
+}
+
+/* =====================================================
+   Init
+   ===================================================== */
+document.addEventListener("input", e => {
+  if (e.target.closest("#tab-invoice")) render();
+});
+
+fillSettingsForm();
+fillForm({ number: nextInvoiceNumber(), date: new Date().toISOString().slice(0, 10), dueDays: 14 });
+renderSavedList();
+</script>
+</body>
+</html>

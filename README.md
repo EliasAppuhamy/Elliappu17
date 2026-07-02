@@ -1,5 +1,20 @@
 # Elyon.web
 
+## 🧾 Rechnungsgenerator
+
+In diesem Repo liegt ein kompletter Rechnungsgenerator für Elyon.web: [`index.html`](index.html)
+
+**Benutzung:** Die Datei `index.html` einfach im Browser öffnen (Doppelklick genügt – keine Installation nötig).
+
+- **Meine Daten** (Tab ⚙️): Firmendaten, Steuernummer, IBAN und eigenes Logo einmalig eintragen – wird dauerhaft im Browser gespeichert und erscheint automatisch auf jeder Rechnung.
+- **Rechnung**: Kundendaten und Leistungen eingeben, rechts erscheint die fertige Rechnung als Live-Vorschau (DIN A4).
+- **Drucken / PDF**: Über den grünen Button wird der Druckdialog geöffnet – dort „Als PDF speichern“ wählen, um die Rechnung zu verschicken, oder direkt drucken.
+- **Gespeichert**: Rechnungen speichern, später wieder öffnen, duplizieren oder löschen. Die Rechnungsnummer (Format `JJJJ-NNN`) zählt automatisch fortlaufend hoch.
+
+Die Rechnung enthält alle Pflichtangaben nach **§ 14 Abs. 4 UStG** (Name und Anschrift beider Parteien, Steuernummer, Rechnungsdatum, fortlaufende Rechnungsnummer, Leistungsbeschreibung, Leistungszeitraum, Entgelt) sowie den Hinweis auf die Umsatzsteuerbefreiung als Kleinunternehmer nach **§ 19 Abs. 1 UStG**.
+
+---
+
 ## Web Design & Web Development for Modern Businesses
 
 Hi, I’m the founder of **Elyon.web** — a web design and web development studio focused on building clean, fast, and effective websites for businesses.
