@@ -6,6 +6,8 @@
 <title>Elyon.web – Rechnungsgenerator</title>
 <style>
   :root {
+    --soft: #f0fdf4;
+    --field-bg: #ffffff;
     --green-900: #0b3d2e;
     --green-800: #14532d;
     --green-700: #15803d;
@@ -19,6 +21,40 @@
     --bg: #f6faf7;
     --card: #ffffff;
     --radius: 14px;
+    --shadow: 0 4px 24px rgba(11, 61, 46, 0.08);
+  }
+
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1712;
+      --card: #17221b;
+      --soft: #1c2b21;
+      --field-bg: #101a14;
+      --ink: #e4efe8;
+      --muted: #94aa9c;
+      --line: #2a3a30;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1712;
+    --card: #17221b;
+    --soft: #1c2b21;
+    --field-bg: #101a14;
+    --ink: #e4efe8;
+    --muted: #94aa9c;
+    --line: #2a3a30;
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6faf7;
+    --card: #ffffff;
+    --soft: #f0fdf4;
+    --field-bg: #ffffff;
+    --ink: #1a2e24;
+    --muted: #5f7268;
+    --line: #e2ece6;
     --shadow: 0 4px 24px rgba(11, 61, 46, 0.08);
   }
 
@@ -90,7 +126,7 @@
   .btn-light { background: var(--green-100); color: var(--green-800); }
   .btn-light:hover { background: #cdeed9; }
   .btn-outline {
-    background: #fff; color: var(--green-800);
+    background: var(--field-bg); color: var(--green-600);
     border: 1.5px solid var(--line);
   }
   .btn-outline:hover { border-color: var(--green-500); }
@@ -122,7 +158,7 @@
   .panel-head {
     padding: 16px 22px;
     border-bottom: 1px solid var(--line);
-    background: var(--green-50);
+    background: var(--soft);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -131,7 +167,7 @@
   .panel-head h2 {
     font-size: 15px;
     font-weight: 700;
-    color: var(--green-900);
+    color: var(--ink);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -157,7 +193,7 @@
     font-size: 14.5px;
     font-family: inherit;
     color: var(--ink);
-    background: #fff;
+    background: var(--field-bg);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   input:focus, textarea:focus, select:focus {
@@ -207,13 +243,13 @@
   .totals-box {
     margin-top: 14px;
     padding: 12px 16px;
-    background: var(--green-50);
+    background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
     font-weight: 700;
-    color: var(--green-900);
+    color: var(--ink);
     font-size: 16px;
   }
 
@@ -234,10 +270,10 @@
     cursor: pointer;
   }
   .tab.active {
-    background: var(--green-50);
-    color: var(--green-800);
+    background: var(--soft);
+    color: var(--green-600);
     border: 1px solid var(--line);
-    border-bottom-color: var(--green-50);
+    border-bottom-color: var(--soft);
   }
   .tabpage { display: none; }
   .tabpage.active { display: block; }
@@ -253,10 +289,10 @@
     border: 1px solid var(--line);
     border-radius: 10px;
     margin-bottom: 8px;
-    background: #fff;
+    background: var(--card);
   }
   .saved-list .meta { flex: 1; min-width: 0; }
-  .saved-list .meta strong { display: block; font-size: 14.5px; color: var(--green-900); }
+  .saved-list .meta strong { display: block; font-size: 14.5px; color: var(--ink); }
   .saved-list .meta span { font-size: 12.5px; color: var(--muted); }
   .saved-list .actions { display: flex; gap: 6px; flex-shrink: 0; }
   .empty-note {
@@ -275,7 +311,7 @@
     cursor: pointer;
     transition: border-color 0.15s ease, background 0.15s ease;
   }
-  .logo-drop:hover { border-color: var(--green-500); background: var(--green-50); }
+  .logo-drop:hover { border-color: var(--green-500); background: var(--soft); }
   .logo-drop img { max-height: 70px; max-width: 100%; }
   .logo-drop p { font-size: 13px; color: var(--muted); margin-top: 6px; }
 
@@ -294,12 +330,14 @@
     gap: 10px;
     flex-wrap: wrap;
   }
-  .preview-toolbar .title { font-weight: 700; color: var(--green-900); font-size: 15px; }
+  .preview-toolbar .title { font-weight: 700; color: var(--ink); font-size: 15px; }
 
   .sheet-scale {
     overflow-x: auto;
   }
   .sheet {
+    --line: #e2ece6;
+    --green-50: #f0fdf4;
     width: 210mm;
     min-height: 297mm;
     background: #fff;
@@ -3224,20 +3262,37 @@ const LS_SETTINGS = "elyon_invoice_settings";
 const LS_INVOICES = "elyon_invoices";
 const LS_COUNTER  = "elyon_invoice_counter";
 
+/* localStorage-Zugriff kann in eingebetteten/sandboxed Ansichten blockiert
+   sein – dann In-Memory-Fallback, damit die App trotzdem funktioniert. */
+const appStorage = (() => {
+  try {
+    localStorage.setItem("__elyon_test", "1");
+    localStorage.removeItem("__elyon_test");
+    return localStorage;
+  } catch (e) {
+    const mem = {};
+    return {
+      getItem: k => (k in mem ? mem[k] : null),
+      setItem: (k, v) => { mem[k] = String(v); },
+      removeItem: k => { delete mem[k]; }
+    };
+  }
+})();
+
 let settings = loadSettings();
 let currentId = null;
 let currentCreatedAt = null;
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem(LS_SETTINGS);
+    const raw = appStorage.getItem(LS_SETTINGS);
     if (raw) return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
   } catch (e) {}
   return Object.assign({}, DEFAULT_SETTINGS);
 }
 
 function persistSettings() {
-  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  appStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
 }
 
 /* ---------- Hilfsfunktionen ---------- */
@@ -3271,7 +3326,7 @@ function showTab(id, btn) {
 function nextInvoiceNumber() {
   const year = new Date().getFullYear();
   let data = { year: year, count: 0 };
-  try { data = Object.assign(data, JSON.parse(localStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
+  try { data = Object.assign(data, JSON.parse(appStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
   if (data.year !== year) { data.year = year; data.count = 0; }
   return `${data.year}-${String(data.count + 1).padStart(3, "0")}`;
 }
@@ -3281,12 +3336,12 @@ function bumpCounter(number) {
   if (!m) return;
   const year = parseInt(m[1], 10), num = parseInt(m[2], 10);
   let data = { year: year, count: 0 };
-  try { data = Object.assign(data, JSON.parse(localStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
+  try { data = Object.assign(data, JSON.parse(appStorage.getItem(LS_COUNTER) || "{}")); } catch (e) {}
   if (data.year !== year || num > data.count) {
     data.year = year;
     data.count = Math.max(num, data.year === year ? data.count : 0);
   }
-  localStorage.setItem(LS_COUNTER, JSON.stringify({ year: year, count: Math.max(num, data.count) }));
+  appStorage.setItem(LS_COUNTER, JSON.stringify({ year: year, count: Math.max(num, data.count) }));
 }
 
 /* =====================================================
@@ -3526,7 +3581,7 @@ function renderQr(f, s, total) {
    Speichern / Laden von Rechnungen
    ===================================================== */
 function loadInvoices() {
-  try { return JSON.parse(localStorage.getItem(LS_INVOICES) || "[]"); } catch (e) { return []; }
+  try { return JSON.parse(appStorage.getItem(LS_INVOICES) || "[]"); } catch (e) { return []; }
 }
 
 function saveInvoice() {
@@ -3540,7 +3595,7 @@ function saveInvoice() {
   const idx = list.findIndex(i => i.id === f.id);
   f.savedAt = new Date().toISOString();
   if (idx >= 0) list[idx] = f; else list.unshift(f);
-  localStorage.setItem(LS_INVOICES, JSON.stringify(list));
+  appStorage.setItem(LS_INVOICES, JSON.stringify(list));
   bumpCounter(f.number);
   renderSavedList();
   toast("Rechnung " + f.number + " gespeichert ✓");
@@ -3596,7 +3651,7 @@ function renderSavedList() {
     btnDel.onclick = () => {
       if (!confirm(`Rechnung ${inv.number} wirklich löschen?`)) return;
       const rest = loadInvoices().filter(i => i.id !== inv.id);
-      localStorage.setItem(LS_INVOICES, JSON.stringify(rest));
+      appStorage.setItem(LS_INVOICES, JSON.stringify(rest));
       renderSavedList();
       toast("Rechnung gelöscht");
     };
