@@ -460,8 +460,10 @@
   .sheet .totals .trow {
     display: flex;
     justify-content: space-between;
+    gap: 4mm;
     padding: 1.2mm 3mm;
   }
+  .sheet .totals .trow span:last-child { white-space: nowrap; }
   .sheet .totals .grand {
     background: var(--green-900);
     color: #fff;
@@ -603,6 +605,15 @@
 
     <!-- ---- Tab: Rechnung ---- -->
     <div class="tabpage active panel-body" id="tab-invoice">
+      <div class="field">
+        <label for="docType">Rechnungsart</label>
+        <select id="docType">
+          <option value="rechnung">Rechnung</option>
+          <option value="teilrechnung">Teilrechnung (Abschlagsrechnung)</option>
+          <option value="schlussrechnung">Schlussrechnung</option>
+        </select>
+      </div>
+
       <div class="row">
         <div class="field">
           <label for="invNumber">Rechnungsnummer</label>
@@ -674,8 +685,26 @@
       <div id="itemRows"></div>
       <button class="btn btn-light btn-sm" onclick="addItem()">＋ Position hinzufügen</button>
 
+      <div class="row" style="margin-top: 16px;">
+        <div class="field">
+          <label for="discountValue">Rabatt (optional)</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="number" id="discountValue" min="0" step="0.01" placeholder="0">
+            <select id="discountType" style="max-width: 80px;">
+              <option value="pct">%</option>
+              <option value="abs">€</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="prepaid">Abzügl. bereits berechneter Abschläge (€)</label>
+          <input type="number" id="prepaid" min="0" step="0.01" placeholder="0">
+          <div class="hint">Für Schlussrechnungen: Summe der schon gestellten Teil-/Abschlagsrechnungen.</div>
+        </div>
+      </div>
+
       <div class="totals-box">
-        <span>Gesamtbetrag</span>
+        <span>Zu zahlender Betrag</span>
         <span id="formTotal">0,00 €</span>
       </div>
 
@@ -802,7 +831,7 @@
         <div class="head-band">
           <div class="logo-slot"><img id="pLogo" src="" alt="Logo"></div>
           <div class="doc-title">
-            <h1>Rechnung</h1>
+            <h1 id="pDocTitle">Rechnung</h1>
             <div class="nr">Nr. <span id="pNumber">–</span></div>
           </div>
         </div>
@@ -846,8 +875,10 @@
 
           <div class="totals">
             <div class="trow"><span>Zwischensumme</span><span id="pSubtotal">0,00 €</span></div>
+            <div class="trow" id="pDiscountRow" style="display:none;"><span id="pDiscountLabel">Rabatt</span><span id="pDiscount">0,00 €</span></div>
             <div class="trow"><span>Umsatzsteuer</span><span>entfällt*</span></div>
-            <div class="trow grand"><span>Rechnungsbetrag</span><span id="pTotal">0,00 €</span></div>
+            <div class="trow" id="pPrepaidRow" style="display:none;"><span>Abzüglich Abschläge</span><span id="pPrepaid">0,00 €</span></div>
+            <div class="trow grand"><span id="pTotalLabel">Rechnungsbetrag</span><span id="pTotal">0,00 €</span></div>
           </div>
 
           <div class="tax-note" id="pTaxNote">*&nbsp;Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</div>
@@ -3207,32 +3238,34 @@ var qrcode = function() {
    jederzeit durch eine eigene Bilddatei ersetzbar.
    ===================================================== */
 const DEFAULT_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(
-`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="440" viewBox="0 0 900 440">
+`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500">
   <defs>
-    <linearGradient id="eaGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3db54a"/>
-      <stop offset="0.55" stop-color="#1c7a35"/>
-      <stop offset="1" stop-color="#0d3a22"/>
+    <linearGradient id="eaGrad" gradientUnits="userSpaceOnUse" x1="130" y1="0" x2="770" y2="0">
+      <stop offset="0" stop-color="#3ab54a"/>
+      <stop offset="0.45" stop-color="#1e8038"/>
+      <stop offset="1" stop-color="#0b2f1d"/>
     </linearGradient>
-    <linearGradient id="swooshGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3db54a"/>
-      <stop offset="1" stop-color="#14532d"/>
+    <linearGradient id="swooshGrad" gradientUnits="userSpaceOnUse" x1="75" y1="0" x2="895" y2="0">
+      <stop offset="0" stop-color="#2fa845"/>
+      <stop offset="0.55" stop-color="#a8bfb0"/>
+      <stop offset="1" stop-color="#1a4d2c"/>
     </linearGradient>
   </defs>
-  <rect width="900" height="440" rx="18" fill="#ffffff"/>
-  <g transform="translate(105,0) skewX(-14)" fill="url(#eaGrad)">
-    <rect x="120" y="62"  width="205" height="54"/>
-    <rect x="120" y="150" width="172" height="52"/>
-    <rect x="120" y="236" width="205" height="54"/>
-    <polygon points="486,62 552,62 664,290 596,290"/>
-    <polygon points="486,62 552,62 442,290 376,290"/>
-    <rect x="448" y="196" width="130" height="46"/>
+  <rect width="1000" height="500" fill="#ffffff"/>
+  <ellipse cx="500" cy="468" rx="330" ry="16" fill="#0b2f1d" opacity="0.07"/>
+  <path d="M 75 345 C 290 420 620 390 895 200" fill="none" stroke="url(#swooshGrad)" stroke-width="13" stroke-linecap="round"/>
+  <g transform="translate(150,0) skewX(-20)" fill="url(#eaGrad)">
+    <polygon points="130,90 370,90 370,148 130,148"/>
+    <polygon points="130,166 330,166 330,224 130,224"/>
+    <polygon points="130,242 365,242 365,300 130,300"/>
+    <polygon points="560,90 635,90 520,300 445,300"/>
+    <polygon points="560,90 635,90 770,300 695,300"/>
+    <polygon points="512,212 706,212 706,258 500,258"/>
   </g>
-  <path d="M 62 322 C 290 392 600 360 812 190" fill="none" stroke="url(#swooshGrad)" stroke-width="15" stroke-linecap="round"/>
-  <polygon points="846,158 812,215 786,182" fill="#14532d"/>
-  <line x1="120" y1="382" x2="205" y2="382" stroke="#9db8a8" stroke-width="4"/>
-  <line x1="695" y1="382" x2="780" y2="382" stroke="#9db8a8" stroke-width="4"/>
-  <text x="450" y="398" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="47" font-weight="600" letter-spacing="16"><tspan fill="#2f9e44">WEB </tspan><tspan fill="#14402a">DESIGN</tspan></text>
+  <polygon points="948,158 897,225 866,180" fill="#14532d"/>
+  <line x1="108" y1="428" x2="175" y2="428" stroke="#8aa595" stroke-width="5"/>
+  <line x1="825" y1="428" x2="892" y2="428" stroke="#8aa595" stroke-width="5"/>
+  <text x="500" y="446" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="54" font-weight="600" letter-spacing="20"><tspan fill="#2f9e44">WEB </tspan><tspan fill="#143b28">DESIGN</tspan></text>
 </svg>`);
 
 /* =====================================================
@@ -3388,6 +3421,10 @@ function readForm() {
     date: document.getElementById("invDate").value,
     period: document.getElementById("servicePeriod").value.trim(),
     dueDays: parseInt(document.getElementById("dueDays").value, 10) || 0,
+    docType: document.getElementById("docType").value,
+    discountValue: parseFloat(document.getElementById("discountValue").value) || 0,
+    discountType: document.getElementById("discountType").value,
+    prepaid: parseFloat(document.getElementById("prepaid").value) || 0,
     deviceNoteMode: document.getElementById("deviceNoteMode").value,
     custCompany: document.getElementById("custCompany").value.trim(),
     custContact: document.getElementById("custContact").value.trim(),
@@ -3408,6 +3445,10 @@ function fillForm(inv) {
   document.getElementById("invDate").value = inv.date || "";
   document.getElementById("servicePeriod").value = inv.period || "";
   document.getElementById("dueDays").value = inv.dueDays != null ? inv.dueDays : 14;
+  document.getElementById("docType").value = inv.docType || "rechnung";
+  document.getElementById("discountValue").value = inv.discountValue || "";
+  document.getElementById("discountType").value = inv.discountType || "pct";
+  document.getElementById("prepaid").value = inv.prepaid || "";
   document.getElementById("deviceNoteMode").value = inv.deviceNoteMode || "auto";
   document.getElementById("custCompany").value = inv.custCompany || "";
   document.getElementById("custContact").value = inv.custContact || "";
@@ -3430,6 +3471,23 @@ function newInvoice() {
 }
 
 /* =====================================================
+   Beträge: Zwischensumme − Rabatt − Abschläge = zu zahlen
+   ===================================================== */
+const DOC_TITLES = { rechnung: "Rechnung", teilrechnung: "Teilrechnung", schlussrechnung: "Schlussrechnung" };
+
+function computeTotals(f) {
+  const subtotal = (f.items || []).reduce((s, i) => s + i.qty * i.price, 0);
+  let discount = 0;
+  if (f.discountValue > 0) {
+    discount = f.discountType === "pct" ? subtotal * f.discountValue / 100 : f.discountValue;
+    discount = Math.min(discount, subtotal);
+  }
+  const prepaid = f.prepaid > 0 ? f.prepaid : 0;
+  const due = Math.max(subtotal - discount - prepaid, 0);
+  return { subtotal, discount, prepaid, due };
+}
+
+/* =====================================================
    Live-Vorschau rendern
    ===================================================== */
 function render() {
@@ -3437,6 +3495,10 @@ function render() {
   const s = settings;
 
   document.getElementById("pLogo").src = s.logo || DEFAULT_LOGO;
+  const docTitle = DOC_TITLES[f.docType] || "Rechnung";
+  const titleEl = document.getElementById("pDocTitle");
+  titleEl.textContent = docTitle;
+  titleEl.style.fontSize = docTitle.length > 10 ? "15pt" : "20pt";
   document.getElementById("pNumber").textContent = f.number || "–";
   document.getElementById("pMetaNumber").textContent = f.number || "–";
   document.getElementById("pMetaOrder").textContent = f.orderNumber || "–";
@@ -3464,14 +3526,12 @@ function render() {
   document.getElementById("pCustStreet").textContent = f.custStreet;
   document.getElementById("pCustCity").textContent = [f.custZip, f.custCity].filter(Boolean).join(" ");
 
-  document.getElementById("pSubject").textContent = f.subject ? "Rechnung – " + f.subject : "Rechnung";
+  document.getElementById("pSubject").textContent = f.subject ? docTitle + " – " + f.subject : docTitle;
 
   const tbody = document.getElementById("pItems");
   tbody.innerHTML = "";
-  let total = 0;
   f.items.forEach((it, idx) => {
     const line = it.qty * it.price;
-    total += line;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${idx + 1}</td>
@@ -3493,9 +3553,24 @@ function render() {
     tbody.appendChild(tr);
   }
 
-  document.getElementById("pSubtotal").textContent = fmtEUR.format(total);
-  document.getElementById("pTotal").textContent = fmtEUR.format(total);
-  document.getElementById("formTotal").textContent = fmtEUR.format(total);
+  const t = computeTotals(f);
+  const total = t.due;
+  document.getElementById("pSubtotal").textContent = fmtEUR.format(t.subtotal);
+
+  const discRow = document.getElementById("pDiscountRow");
+  discRow.style.display = t.discount > 0 ? "flex" : "none";
+  document.getElementById("pDiscountLabel").textContent =
+    f.discountType === "pct" ? `Rabatt (${String(f.discountValue).replace(".", ",")} %)` : "Rabatt";
+  document.getElementById("pDiscount").textContent = "− " + fmtEUR.format(t.discount);
+
+  const preRow = document.getElementById("pPrepaidRow");
+  preRow.style.display = t.prepaid > 0 ? "flex" : "none";
+  document.getElementById("pPrepaid").textContent = "− " + fmtEUR.format(t.prepaid);
+
+  document.getElementById("pTotalLabel").textContent =
+    f.docType === "schlussrechnung" && t.prepaid > 0 ? "Restbetrag" : "Rechnungsbetrag";
+  document.getElementById("pTotal").textContent = fmtEUR.format(t.due);
+  document.getElementById("formTotal").textContent = fmtEUR.format(t.due);
 
   document.getElementById("pTaxNote").textContent = "* " + (s.taxNote || DEFAULT_SETTINGS.taxNote);
 
@@ -3508,7 +3583,7 @@ function render() {
   devBox.style.display = showDevice ? "block" : "none";
 
   document.getElementById("pPayNote").textContent =
-    `Bitte überweisen Sie den Rechnungsbetrag von ${fmtEUR.format(total)} bis zum ${dueText} ohne Abzug unter Angabe der Rechnungsnummer ${f.number || "–"} auf das unten angegebene Konto.`;
+    `Bitte überweisen Sie den Betrag von ${fmtEUR.format(total)} bis zum ${dueText} ohne Abzug unter Angabe der Rechnungsnummer ${f.number || "–"} auf das unten angegebene Konto.`;
 
   renderQr(f, s, total);
 
@@ -3608,12 +3683,13 @@ function renderSavedList() {
   ul.innerHTML = "";
   empty.style.display = list.length ? "none" : "block";
   list.forEach(inv => {
-    const total = (inv.items || []).reduce((s, i) => s + i.qty * i.price, 0);
+    const total = computeTotals(inv).due;
     const li = document.createElement("li");
     const meta = document.createElement("div");
     meta.className = "meta";
     const strong = document.createElement("strong");
-    strong.textContent = `${inv.number} · ${inv.custCompany || "Ohne Kunde"}`;
+    const typePrefix = inv.docType && inv.docType !== "rechnung" ? (DOC_TITLES[inv.docType] || "") + " " : "";
+    strong.textContent = `${typePrefix}${inv.number} · ${inv.custCompany || "Ohne Kunde"}`;
     const span = document.createElement("span");
     span.textContent = `${fmtDate(inv.date)} · ${fmtEUR.format(total)}`;
     meta.appendChild(strong); meta.appendChild(span);
