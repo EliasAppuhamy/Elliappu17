@@ -6,12 +6,15 @@ In diesem Repo liegt ein kompletter Rechnungsgenerator für Elyon.web: [`index.h
 
 **Benutzung:** Die Datei `index.html` einfach im Browser öffnen (Doppelklick genügt – keine Installation nötig).
 
-- **Meine Daten** (Tab ⚙️): Firmendaten, Steuernummer, IBAN und eigenes Logo einmalig eintragen – wird dauerhaft im Browser gespeichert und erscheint automatisch auf jeder Rechnung.
-- **Rechnung**: Kundendaten und Leistungen eingeben, rechts erscheint die fertige Rechnung als Live-Vorschau (DIN A4).
+- **Firmendaten fest hinterlegt**: Elyon.web, Inhaber Emanuel Appuhamy, Ackerstraße 31, 40822 Mettmann – inkl. Steuernummer, Bankverbindung (ING), E-Mail und Telefon. Alles im Tab „⚙️ Meine Daten“ anpassbar (wird dauerhaft im Browser gespeichert), ebenso das Logo per Upload.
+- **Rechnung**: Kundendaten und Leistungen eingeben, rechts erscheint die fertige Rechnung als Live-Vorschau (DIN A4, eine Seite).
+- **Automatisch**: fortlaufende Rechnungsnummer (`JJJJ-NNN`), Auftragsnummer, Erstellungs-Zeitstempel, Liefer-/Leistungsdatum, Zahlungsziel und Gesamtbetrag.
+- **GiroCode**: Unten links wird automatisch ein EPC-QR-Code erzeugt – der Kunde scannt ihn mit seiner Banking-App und Empfänger (Emanuel Appuhamy), IBAN, Betrag und Verwendungszweck (= Rechnungsnummer) sind vorausgefüllt.
+- **Gerätehinweis**: Bei Positionen wie Smartphone-/Laptop-Einrichtung erscheint automatisch der rechtliche Hinweis, dass keine eigene Gerätegarantie besteht und die Gewährleistungs-/Garantiebedingungen des Verkäufers bzw. Herstellers gelten (Leistung: ausschließlich Beschaffung, Einrichtung und Übergabe).
 - **Drucken / PDF**: Über den grünen Button wird der Druckdialog geöffnet – dort „Als PDF speichern“ wählen, um die Rechnung zu verschicken, oder direkt drucken.
-- **Gespeichert**: Rechnungen speichern, später wieder öffnen, duplizieren oder löschen. Die Rechnungsnummer (Format `JJJJ-NNN`) zählt automatisch fortlaufend hoch.
+- **Gespeichert**: Rechnungen speichern, später wieder öffnen, duplizieren oder löschen.
 
-Die Rechnung enthält alle Pflichtangaben nach **§ 14 Abs. 4 UStG** (Name und Anschrift beider Parteien, Steuernummer, Rechnungsdatum, fortlaufende Rechnungsnummer, Leistungsbeschreibung, Leistungszeitraum, Entgelt) sowie den Hinweis auf die Umsatzsteuerbefreiung als Kleinunternehmer nach **§ 19 Abs. 1 UStG**.
+Die Rechnung enthält alle Pflichtangaben nach **§ 14 Abs. 4 UStG** (Name und Anschrift beider Parteien, Steuernummer, Rechnungsdatum, fortlaufende Rechnungsnummer, Leistungsbeschreibung, Liefer-/Leistungszeitraum, Entgelt) sowie den Hinweis auf die Umsatzsteuerbefreiung als Kleinunternehmer nach **§ 19 Abs. 1 UStG**. Der QR-Code folgt dem GiroCode-Standard (EPC069-12); die eingebettete QR-Bibliothek ist [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT-Lizenz).
 
 ---
 
